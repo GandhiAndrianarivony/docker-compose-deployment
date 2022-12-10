@@ -1,0 +1,37 @@
+version: '3.9'
+
+services:
+  postgres-db:
+    image: postgres:15.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=orion
+    expose:
+      - 5432
+    volumes:
+      - prefect_db:/var/lib/postgresql/data
+    profiles: [ "orion" ]
+
+  orion:
+    image: prefecthq/prefect:2.6.9-python3.11
+    restart: always
+    volumes:
+      - prefect_data:/root/.prefect
+      - prefect_flows:/flows
+    entrypoint: [ "prefect", "orion", "start" ]
+    environment:
+      - PREFECT_ORION_API_HOST=0.0.0.0
+      - PREFECT_ORION_DATABASE_CONNECTION_URL=postgresql+asyncpg://postgres:postgres@postgres-db:5432/orion
+      - PREFECT_API_URL=http://172.17.0.1:4200/api
+    ports:
+      - 4200:4200
+    depends_on:
+      - postgres-db
+    profiles: [ "orion" ]
+
+volumes:
+  prefect_db:
+  prefect_flows:
+  prefect_data:
