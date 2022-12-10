@@ -1,0 +1,6 @@
+Psycopg2
+pg8000
+pydantic
+requests_toolbelt
+SQLAlchemy
+pandas
